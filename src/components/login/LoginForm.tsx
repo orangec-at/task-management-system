@@ -64,22 +64,6 @@ export default function LoginForm() {
     });
   }
 
-  const handleSetRole = (role: string) => () => {
-    const roleMembers = users.filter((user) => user.userRole === role);
-    const user = roleMembers[Math.ceil(Math.random() * roleMembers.length)];
-    if (!user) {
-      form.setError("email", {
-        type: "manual",
-        message: "User not found",
-      });
-      return;
-    }
-
-    form.setValue("email", user.userEmail);
-    form.setValue("password", "jinwoo");
-    form.handleSubmit(onSubmit)();
-  };
-
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -134,36 +118,6 @@ export default function LoginForm() {
               </Button>
               <Button type="submit" className="hover:cursor-pointer">
                 Submit
-              </Button>
-            </div>
-            <div className="flex justify-between ">
-              <Button
-                type="button"
-                onClick={handleSetRole("Admin")}
-                className="hover:cursor-pointer"
-              >
-                Admin
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSetRole("PrimeUser")}
-                className="hover:cursor-pointer"
-              >
-                Prime User
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSetRole("RegularUser")}
-                className="hover:cursor-pointer"
-              >
-                Regular User
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSetRole("Viewer")}
-                className="hover:cursor-pointer"
-              >
-                Viewer
               </Button>
             </div>
           </form>
