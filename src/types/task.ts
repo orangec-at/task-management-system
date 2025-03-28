@@ -1,5 +1,4 @@
 // types/task.ts
-
 export interface Task {
   id: string;
   taskName: string;

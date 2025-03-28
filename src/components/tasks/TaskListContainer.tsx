@@ -125,15 +125,28 @@ export function TaskListContainer({ initialTasks }: TaskListContainerProps) {
   // 정렬 적용
   const sortedTasks = [...filteredTasks];
   if (sortConfig.key && sortConfig.direction) {
-    sortedTasks.sort((a, b) => {
-      if (a[sortConfig.key!] < b[sortConfig.key!]) {
-        return sortConfig.direction === "ascending" ? -1 : 1;
-      }
-      if (a[sortConfig.key!] > b[sortConfig.key!]) {
-        return sortConfig.direction === "ascending" ? 1 : -1;
-      }
-      return 0;
-    });
+    try {
+      sortedTasks.sort((a, b) => {
+        // 안전하게 값 추출
+        const key = sortConfig.key as keyof Task;
+        const direction = sortConfig.direction;
+
+        // 값이 없는 경우 처리
+        if (a[key] === undefined && b[key] === undefined) return 0;
+        if (a[key] === undefined) return direction === "ascending" ? -1 : 1;
+        if (b[key] === undefined) return direction === "ascending" ? 1 : -1;
+
+        // 문자열 변환 비교
+        const aStr = String(a[key]).toLowerCase();
+        const bStr = String(b[key]).toLowerCase();
+
+        if (aStr < bStr) return direction === "ascending" ? -1 : 1;
+        if (aStr > bStr) return direction === "ascending" ? 1 : -1;
+        return 0;
+      });
+    } catch (error) {
+      console.error("정렬 중 오류 발생:", error);
+    }
   }
 
   // Task Type 필터 토글
