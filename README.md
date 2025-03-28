@@ -1,36 +1,261 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 태스크 관리 시스템
 
-## Getting Started
+React.js와 Next.js를 사용하여 구축한 역할 기반 태스크 관리 시스템입니다.
 
-First, run the development server:
+## 프로젝트 개요
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+이 프로젝트는 다음 기능을 갖춘 태스크 관리 시스템을 구현합니다:
+
+- 역할 기반 접근 제어 (Admin, PrimeUser, RegularUser, Viewer)
+- 필터링 및 검색 기능이 있는 태스크 목록
+- 태스크 타입에 따른 동적 폼을 통한 태스크 생성
+- 사용자 관리
+
+## 기술 스택
+
+### 주요 기술
+
+- **프레임워크**: React.js + Next.js
+- **디자인 시스템**: shadcn/ui
+- **상태 관리**: React Context API
+- **폼 핸들링**: React Hook Form (유효성 검사용)
+
+### 추가 라이브러리
+
+- **스타일링**: Tailwind CSS
+
+## 프로젝트 구조
+
+```
+task-management-system/
+├── app
+│   ├── favicon.ico             # 웹사이트 파비콘
+│   ├── globals.css             # 전역 CSS 스타일
+│   ├── layout.tsx              # 전체 애플리케이션 레이아웃
+│   ├── page.tsx                # 메인 페이지 (로그인)
+│   ├── tasks
+│   │   └── page.tsx            # 태스크 목록 페이지
+│   └── users
+│       └── page.tsx            # 사용자 목록 페이지
+├── components
+│   ├── layout
+│   │   ├── Navbar.tsx          # 상단 네비게이션 바
+│   │   ├── Sidebar.tsx         # 측면 메뉴 사이드바
+│   │   └── UserStatus.tsx      # 현재 로그인한 사용자 상태 표시
+│   ├── login
+│   │   └── LoginForm.tsx       # 로그인 폼 컴포넌트
+│   ├── providers
+│   │   ├── AuthProvider.tsx    # 인증 상태 관리 제공자
+│   │   └── ClientProviders.tsx # 클라이언트 측 제공자 모음
+│   ├── tasks
+│   │   ├── CommonFields.tsx    # 태스크 폼 공통 필드
+│   │   ├── DatePickerField.tsx # 날짜 선택 필드
+│   │   ├── DeliveryForm.tsx    # 택배요청 양식 컴포넌트
+│   │   ├── PurchaseForm.tsx    # 물품구매 양식 컴포넌트
+│   │   ├── TaskCountBadge.tsx  # 태스크 개수 표시 배지
+│   │   ├── TaskListContainer.tsx # 태스크 목록 컨테이너
+│   │   ├── TaskListFilters.tsx # 태스크 목록 필터
+│   │   ├── TaskListHeader.tsx  # 태스크 목록 헤더
+│   │   ├── TaskListTable.tsx   # 태스크 목록 테이블
+│   │   ├── TaskModal.tsx       # 태스크 생성/수정 모달
+│   │   └── TaskNameDropdown.tsx # 태스크 이름 드롭다운
+│   ├── ui                      # UI 컴포넌트 (shadcn/ui)
+│   │   ├── avatar.tsx
+│   │   ├── badge.tsx
+│   │   ├── button.tsx
+│   │   ├── calendar.tsx
+│   │   ├── card.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── dialog.tsx
+│   │   ├── dropdown-menu.tsx
+│   │   ├── form.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   ├── navigation-menu.tsx
+│   │   ├── popover.tsx
+│   │   ├── select.tsx
+│   │   ├── separator.tsx
+│   │   ├── sheet.tsx
+│   │   ├── sidebar.tsx
+│   │   ├── skeleton.tsx
+│   │   ├── table.tsx
+│   │   ├── textarea.tsx
+│   │   └── tooltip.tsx
+│   └── users
+│       ├── UserListContainer.tsx # 사용자 목록 컨테이너
+│       ├── UserListFilters.tsx # 사용자 목록 필터
+│       ├── UserListHeader.tsx  # 사용자 목록 헤더
+│       ├── UserListTable.tsx   # 사용자 목록 테이블
+│       └── UserRoleBadge.tsx   # 사용자 역할 배지
+├── data
+│   ├── task_list.json          # 태스크 목록 데이터
+│   └── user_list.json          # 사용자 목록 데이터
+├── hooks
+│   └── use-mobile.ts           # 모바일 기기 감지 훅
+├── lib
+│   └── utils.ts                # 일반 유틸리티 함수
+├── middleware.ts               # Next.js 미들웨어 (인증 검사 등)
+├── types
+│   ├── menu.ts                 # 메뉴 관련 타입
+│   ├── task-form.ts            # 태스크 폼 관련 타입
+│   ├── task.ts                 # 태스크 관련 타입
+│   └── user.ts                 # 사용자 관련 타입
+└── utils
+    └── taskUtils.ts            # 태스크 관련 유틸리티 함수
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 역할 기반 접근 제어
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Admin (관리자)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 모든 기능에 대한 완전한 접근 권한
+- 모든 태스크 조회 가능
+- 모든 태스크 생성, 편집, 삭제 가능
+- 모든 사용자에게 태스크 할당 가능
+- 사용자 역할 관리 가능
 
-## Learn More
+### PrimeUser (프라임 사용자)
 
-To learn more about Next.js, take a look at the following resources:
+- 모든 태스크 조회 가능
+- 태스크 생성 가능
+- 자신의 태스크 편집 및 삭제 가능
+- PrimeUser, RegularUser, Viewer 역할에 태스크 할당 가능
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### RegularUser (일반 사용자)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 자신의 태스크만 조회 가능
+- 자신에게 할당되는 태스크 생성 가능
+- 자신의 태스크 편집 및 삭제 가능
 
-## Deploy on Vercel
+### Viewer (뷰어)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 자신에게 할당된 태스크만 조회 가능
+- 할당된 태스크의 상태 업데이트 가능
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 기능
+
+### 로그인 페이지
+
+- user_list.json에 있는 이메일을 확인하는 간단한 로그인 폼
+- 사용자 역할에 따라 적절한 대시보드로 리디렉션
+
+### 사용자 목록 페이지
+
+- 사용자 역할에 따른 접근 제어 (Admin, PrimeUser만 접근 가능)
+- 사용자 역할별 필터링 기능
+- 사용자 이름, 이메일, 전화번호 검색 기능
+- 각 사용자의 역할, 생성일, 마지막 로그인 정보 표시
+- Admin 사용자만 사용자 초대 기능 활성화
+
+### 태스크 목록 페이지
+
+- 사용자 역할별로 필터링된 태스크 표시
+- 생성일 기준 정렬 (최신순)
+- 태스크 타입 및 상태별 필터링
+- 태스크 이름, 담당자, 보고자, 설명으로 검색
+- 필터링된 결과를 표시하는 태스크 수 표시
+
+### 태스크 생성 모달
+
+- 태스크 타입에 따른 다양한 폼 필드 (물품구매 또는 택배요청)
+- 오류 메시지가 포함된 필드 유효성 검사
+- 사용자 역할별로 필터링된 담당자 선택
+- 마감일 선택
+
+## 설정 및 설치
+
+1. 저장소 복제:
+
+```bash
+git clone https://github.com/orangec-at/task-management-system.git
+cd task-management-system
+```
+
+2. 의존성 설치:
+
+```bash
+yarn
+```
+
+3. 개발 서버 실행:
+
+```bash
+yarn dev
+```
+
+5. 브라우저에서 [http://localhost:3000](http://localhost:3000)을 엽니다.
+
+# 태스크 관리 시스템 QA 테스트 케이스
+
+## 기능 테스트 케이스
+
+### 1. 로그인 기능
+
+| ID  | 테스트 케이스        | 테스트 단계                                                                  | 기대 결과                                            | 테스트 데이터                            |
+| --- | -------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------- |
+| 1.1 | 유효한 로그인        | 1. 유효한 이메일 주소 입력<br>2. 아무 비밀번호 입력<br>3. 로그인 클릭        | 사용자가 로그인되고 적절한 대시보드로 리디렉션됨     | 이메일: eobrien@example.org (Admin 역할) |
+| 1.2 | 유효하지 않은 로그인 | 1. 유효하지 않은 이메일 주소 입력<br>2. 아무 비밀번호 입력<br>3. 로그인 클릭 | 오류 메시지가 표시되고 사용자는 로그인 페이지에 남음 | 이메일: notexisting@example.com          |
+| 1.3 | 로그인 버튼 상태     | 1. 로그인 모달 열기<br>2. 로그인 버튼 관찰                                   | 로그인 버튼이 비활성화되어 있어야 함                 | N/A                                      |
+| 1.4 | 로그인 버튼 활성화   | 1. 이메일 주소 입력<br>2. 로그인 버튼 상태 확인                              | 이메일이 입력되면 로그인 버튼이 활성화됨             | 이메일: 비어있지 않은 문자열             |
+
+### 2. 역할 기반 접근 제어
+
+| ID  | 테스트 케이스        | 테스트 단계                                         | 기대 결과                                                              | 테스트 데이터                   |
+| --- | -------------------- | --------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------- |
+| 2.1 | Admin 대시보드       | 1. Admin으로 로그인<br>2. 접근 가능한 기능 확인     | 모든 기능에 접근 가능, 모든 태스크 볼 수 있음, 태스크 생성 버튼 활성화 | 이메일: eobrien@example.org     |
+| 2.2 | PrimeUser 대시보드   | 1. PrimeUser로 로그인<br>2. 접근 가능한 기능 확인   | 모든 태스크 볼 수 있음, 태스크 생성 버튼 활성화                        | 이메일: roger88@example.com     |
+| 2.3 | RegularUser 대시보드 | 1. RegularUser로 로그인<br>2. 접근 가능한 기능 확인 | 자신의 태스크만 볼 수 있음, 태스크 생성 버튼 활성화                    | 이메일: morrislucas@example.org |
+| 2.4 | Viewer 대시보드      | 1. Viewer로 로그인<br>2. 접근 가능한 기능 확인      | 할당된 태스크만 볼 수 있음, 태스크 생성 버튼 비활성화                  | 이메일: nlynch@example.org      |
+
+### 3. 사용자 목록 기능
+
+| ID   | 테스트 케이스                       | 테스트 단계                                                                 | 기대 결과                                             | 테스트 데이터                   |
+| ---- | ----------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------- |
+| 4.1  | 사용자 목록 접근 권한 - Admin       | 1. Admin으로 로그인<br>2. 사용자 목록 페이지 접근                           | 사용자 목록 페이지에 접근 가능, 모든 사용자 정보 표시 | 이메일: eobrien@example.org     |
+| 4.2  | 사용자 목록 접근 권한 - PrimeUser   | 1. PrimeUser로 로그인<br>2. 사용자 목록 페이지 접근                         | 사용자 목록 페이지에 접근 가능, 모든 사용자 정보 표시 | 이메일: roger88@example.com     |
+| 4.3  | 사용자 목록 접근 권한 - RegularUser | 1. RegularUser로 로그인<br>2. 사용자 목록 페이지 접근 시도                  | 접근 거부 또는 자신의 정보만 표시                     | 이메일: morrislucas@example.org |
+| 4.4  | 사용자 목록 접근 권한 - Viewer      | 1. Viewer로 로그인<br>2. 사용자 목록 페이지 접근 시도                       | 접근 거부됨                                           | 이메일: nlynch@example.org      |
+| 4.5  | 사용자 역할별 필터링                | 1. Admin으로 로그인<br>2. 사용자 목록 페이지 접근<br>3. 역할별 필터 적용    | 선택한 역할의 사용자만 표시됨                         | 필터: Admin, PrimeUser 등       |
+| 4.6  | 사용자 이름 검색                    | 1. Admin으로 로그인<br>2. 사용자 목록 페이지 접근<br>3. 사용자 이름 검색    | 검색어와 일치하는 사용자만 표시됨                     | 검색어: "Jeffrey"               |
+| 4.7  | 사용자 이메일 검색                  | 1. Admin으로 로그인<br>2. 사용자 목록 페이지 접근<br>3. 이메일 주소 검색    | 검색어와 일치하는 이메일을 가진 사용자만 표시됨       | 검색어: "example.org"           |
+| 4.8  | 초대 버튼 (Admin)                   | 1. Admin으로 로그인<br>2. 사용자 목록 페이지 접근                           | 사용자 초대 버튼이 활성화되어 있음                    | 이메일: eobrien@example.org     |
+| 4.9  | 초대 버튼 (PrimeUser)               | 1. PrimeUser로 로그인<br>2. 사용자 목록 페이지 접근                         | 사용자 초대 버튼이 비활성화되어 있음                  | 이메일: roger88@example.com     |
+| 4.10 | 사용자 역할 필터 동적 생성          | 1. Admin으로 로그인<br>2. 사용자 목록 페이지 접근<br>3. 역할 필터 옵션 확인 | 데이터에 존재하는 역할만 필터 옵션으로 표시됨         | N/A                             |
+
+### 4. 태스크 목록 필터링
+
+| ID  | 테스트 케이스    | 테스트 단계                                                                      | 기대 결과                               | 테스트 데이터 |
+| --- | ---------------- | -------------------------------------------------------------------------------- | --------------------------------------- | ------------- |
+| 3.1 | 태스크 타입 필터 | 1. 시스템에 로그인<br>2. 태스크 목록으로 이동<br>3. 다양한 태스크 타입 필터 클릭 | 선택한 타입의 태스크만 표시됨           | N/A           |
+| 3.2 | 상태 필터        | 1. 시스템에 로그인<br>2. 태스크 목록으로 이동<br>3. 다양한 상태 필터 클릭        | 선택한 상태의 태스크만 표시됨           | N/A           |
+| 3.3 | 복합 필터링      | 1. 태스크 타입 필터 적용<br>2. 동시에 상태 필터 적용                             | 두 기준 모두 일치하는 태스크만 표시됨   | N/A           |
+| 3.4 | 동적 필터 옵션   | 1. 시스템에 로그인<br>2. 태스크 목록으로 이동<br>3. 필터 옵션 관찰               | 데이터에 존재하는 필터 옵션만 표시됨    | N/A           |
+| 3.5 | 선택된 항목 수   | 1. 필터 적용<br>2. "선택됨" 카운터 확인                                          | 카운터가 현재 표시된 태스크 수를 보여줌 | N/A           |
+
+### 5. 검색 기능
+
+| ID  | 테스트 케이스        | 테스트 단계                                                                    | 기대 결과                               | 테스트 데이터           |
+| --- | -------------------- | ------------------------------------------------------------------------------ | --------------------------------------- | ----------------------- |
+| 5.1 | 태스크 이름으로 검색 | 1. 검색 필드 드롭다운에서 "태스크 이름" 선택<br>2. 검색어 입력<br>3. 결과 관찰 | 이름이 일치하는 태스크만 표시됨         | 검색어: "Task 21"       |
+| 5.2 | 보고자로 검색        | 1. 검색 필드 드롭다운에서 "보고자" 선택<br>2. 검색어 입력<br>3. 결과 관찰      | 보고자가 일치하는 태스크만 표시됨       | 검색어: "Brandon Brown" |
+| 5.3 | 담당자로 검색        | 1. 검색 필드 드롭다운에서 "담당자" 선택<br>2. 검색어 입력<br>3. 결과 관찰      | 담당자가 일치하는 태스크만 표시됨       | 검색어: "Michelle Bell" |
+| 5.4 | 설명으로 검색        | 1. 검색 필드 드롭다운에서 "설명" 선택<br>2. 검색어 입력<br>3. 결과 관찰        | 설명이 일치하는 태스크만 표시됨         | 검색어: "물품구매"      |
+| 5.5 | 빈 검색 결과         | 1. 일치하는 항목이 없는 검색어 입력<br>2. 결과 관찰                            | "태스크를 찾을 수 없음" 메시지가 표시됨 | 검색어: "존재하지 않음" |
+
+### 6. 태스크 생성
+
+| ID  | 테스트 케이스        | 테스트 단계                                                                            | 기대 결과                                 | 테스트 데이터                                                                                    |
+| --- | -------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 6.1 | 물품구매 태스크 생성 | 1. 태스크 생성 버튼 클릭<br>2. 물품구매 타입 선택<br>3. 필수 필드 작성<br>4. 생성 클릭 | 새 태스크가 생성되고 태스크 목록에 표시됨 | 태스크 이름: "새 물품 구매"<br>제품 이름: "사무용품"<br>수량: "10"                               |
+| 6.2 | 택배요청 태스크 생성 | 1. 태스크 생성 버튼 클릭<br>2. 택배요청 타입 선택<br>3. 필수 필드 작성<br>4. 생성 클릭 | 새 태스크가 생성되고 태스크 목록에 표시됨 | 태스크 이름: "새 택배"<br>수신자: "홍길동"<br>전화: "+82 010-1234-5678"<br>주소: "서울시 강남구" |
+| 6.3 | 폼 유효성 검사       | 1. 태스크 생성 버튼 클릭<br>2. 필수 필드를 비워두고 제출 시도                          | 필수 필드에 대한 오류 메시지 표시         | N/A                                                                                              |
+| 6.4 | 전화번호 유효성 검사 | 1. 택배요청 태스크 생성<br>2. 유효하지 않은 전화번호 형식 입력<br>3. 제출 시도         | 전화번호 형식에 대한 오류 메시지          | 전화: "123456789"                                                                                |
+| 6.5 | 수량 유효성 검사     | 1. 물품구매 태스크 생성<br>2. 숫자가 아닌 수량 입력<br>3. 제출 시도                    | 수량 형식에 대한 오류 메시지              | 수량: "abc"                                                                                      |
+
+### 7. 역할 기반 담당자 선택
+
+| ID  | 테스트 케이스           | 테스트 단계                                                          | 기대 결과                                | 테스트 데이터                   |
+| --- | ----------------------- | -------------------------------------------------------------------- | ---------------------------------------- | ------------------------------- |
+| 7.1 | Admin 담당자 옵션       | 1. Admin으로 로그인<br>2. 태스크 생성<br>3. 담당자 드롭다운 확인     | 담당자 드롭다운에 모든 사용자 표시       | 이메일: eobrien@example.org     |
+| 7.2 | PrimeUser 담당자 옵션   | 1. PrimeUser로 로그인<br>2. 태스크 생성<br>3. 담당자 드롭다운 확인   | 드롭다운에 PrimeUser 및 하위 역할만 표시 | 이메일: roger88@example.com     |
+| 7.3 | RegularUser 담당자 옵션 | 1. RegularUser로 로그인<br>2. 태스크 생성<br>3. 담당자 드롭다운 확인 | 드롭다운에 현재 사용자만 표시            | 이메일: morrislucas@example.org |
