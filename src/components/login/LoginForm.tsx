@@ -21,8 +21,9 @@ import {
   CardTitle,
   CardContent,
 } from "../ui/card";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "../providers/AuthProvider";
+import { Eye, EyeOff } from "lucide-react";
 
 import _users from "@/data/user_list.json";
 import { User } from "@/types/user";
@@ -37,10 +38,17 @@ const formSchema = z.object({
 export default function LoginForm() {
   const { login } = useAuth();
   const formRef = useRef(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
   });
+
+  const { watch } = form;
+  const email = watch("email");
+  const password = watch("password");
+  const isFormValid = email && password;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { email } = values;
@@ -64,6 +72,10 @@ export default function LoginForm() {
     });
   }
 
+  function togglePasswordVisibility() {
+    setShowPassword(!showPassword);
+  }
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -84,11 +96,13 @@ export default function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>이메일</FormLabel>
                   <FormControl>
-                    <Input placeholder="email" {...field} />
+                    <Input
+                      placeholder="이메일 주소를 입력해 주세요."
+                      {...field}
+                    />
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
@@ -98,11 +112,28 @@ export default function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-
+                  <FormLabel>비밀번호</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="비밀번호를 입력해 주세요."
+                        {...field}
+                      />
+                    </FormControl>
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <Eye size={20} className="text-gray-500" />
+                      ) : (
+                        <EyeOff size={20} className="text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -116,8 +147,12 @@ export default function LoginForm() {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="hover:cursor-pointer">
-                Submit
+              <Button
+                type="submit"
+                className="hover:cursor-pointer"
+                disabled={!isFormValid}
+              >
+                Log-In
               </Button>
             </div>
           </form>
